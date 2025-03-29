@@ -4,104 +4,67 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Music App</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        background-color: #222;
-        color: white;
-        text-align: center;
-      }
-
-      .container {
-        max-width: 600px;
-        margin: 0 auto;
-      }
-
-      .player {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin-top: 50px;
-      }
-
-      .controls {
-        margin-top: 20px;
-        display: flex;
-        justify-content: center;
-        gap: 20px;
-      }
-
-      .btn {
-        background-color: #4caf50;
-        color: white;
-        border: none;
-        padding: 15px 30px;
-        font-size: 16px;
-        cursor: pointer;
-        border-radius: 5px;
-      }
-
-      .btn:hover {
-        background-color: #45a049;
-      }
-
-      .btn-disabled {
-        background-color: #7c9b7d;
-      }
-
-      .btn-disabled:hover {
-        background-color: #7c9b7d;
-      }
-
-      #current-time,
-      #total-time {
-        font-size: 14px;
-      }
-
-      .track-info {
-        font-size: 18px;
-        margin-top: 20px;
-      }
-
-      #progress-bar {
-        width: 100%;
-        height: 10px;
-        background-color: #444;
-        border-radius: 5px;
-        cursor: pointer;
-      }
-
-      #progress {
-        height: 100%;
-        background-color: #4caf50;
-        width: 0;
-        border-radius: 5px;
-      }
-    </style>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
   </head>
-
-  <body>
-    <div class="container">
-      <div class="player">
-        <div class="track-info">
-          <h2 id="song-title">Song Title</h2>
-          <p id="artist-name">Artist Name</p>
+  <body class="bg-gray-900 text-white text-center">
+    <div class="container mx-auto max-w-lg mt-10">
+      <div class="player flex flex-col items-center">
+        <div class="track-info mt-5">
+          <h2 id="song-title" class="text-2xl font-bold">Song Title</h2>
+          <p id="artist-name" class="text-lg text-gray-400">Artist Name</p>
         </div>
 
         <audio id="audio-player" src="" preload="metadata"></audio>
 
-        <div id="progress-bar">
-          <div id="progress"></div>
+        <div class="w-full mt-5">
+          <!-- Progress bar slider -->
+          <input
+            id="progress-bar"
+            type="range"
+            class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+            min="0"
+            max="100"
+            value="0"
+          />
         </div>
 
-        <div class="controls">
-          <button id="prev-btn btn-disabled" class="btn">Prev</button>
-          <button id="play-pause-btn" class="btn">Play</button>
-          <button id="next-btn" class="btn">Next</button>
+        <div class="controls flex justify-center gap-4 mt-5">
+          <button
+            id="prev-btn"
+            class="btn bg-green-500 text-white py-2 px-4 rounded disabled:bg-gray-500"
+          >
+            Prev
+          </button>
+          <button
+            id="play-pause-btn"
+            class="btn bg-green-500 text-white py-2 px-4 rounded"
+          >
+            Play
+          </button>
+          <button
+            id="next-btn"
+            class="btn bg-green-500 text-white py-2 px-4 rounded disabled:bg-gray-500"
+          >
+            Next
+          </button>
         </div>
 
-        <p id="current-time">00:00</p>
-        <p id="total-time">00:00</p>
+        <p id="current-time" class="text-sm mt-2">00:00</p>
+        <p id="total-time" class="text-sm">00:00</p>
+      </div>
+
+      <!-- Playlist Section -->
+      <div class="playlist mt-10">
+        <h3 class="text-xl font-bold mb-4">Playlist</h3>
+        <ul id="playlist" class="text-left">
+          <!-- Songs will be dynamically added here -->
+        </ul>
+      </div>
+
+      <!-- Waveform Canvas -->
+      <div class="waveform mt-10">
+        <canvas id="waveform" width="400" height="200" class="mx-auto"></canvas>
       </div>
     </div>
 
@@ -120,7 +83,7 @@
         {
           title: "Song 3",
           artist: "Artist 3",
-          src: "song3.mp3",
+          src: "data:audio/mpeg;base64,// Base64 data for song3.mp3",
         },
       ];
 
@@ -132,15 +95,15 @@
       const prevBtn = document.getElementById("prev-btn");
       const nextBtn = document.getElementById("next-btn");
       const progressBar = document.getElementById("progress-bar");
-      const progress = document.getElementById("progress");
       const currentTimeDisplay = document.getElementById("current-time");
       const totalTimeDisplay = document.getElementById("total-time");
       const songTitle = document.getElementById("song-title");
       const artistName = document.getElementById("artist-name");
+      const playlistElement = document.getElementById("playlist");
 
       function setEnablePrevBtnStyles() {
         prevBtn.disabled = false;
-        prevBtn.classList.remove("btn-disabled");
+        prevBtn.classList.remove("disabled:bg-gray-500");
       }
 
       function enablePrevBtn() {
@@ -151,7 +114,7 @@
 
       function setEnableNextBtnStyles() {
         nextBtn.disabled = false;
-        nextBtn.classList.remove("btn-disabled");
+        nextBtn.classList.remove("disabled:bg-gray-500");
       }
 
       function enableNextBtn() {
@@ -162,7 +125,7 @@
 
       function setDisablePrevBtnStyles() {
         prevBtn.disabled = true;
-        prevBtn.classList.add("btn-disabled");
+        prevBtn.classList.add("disabled:bg-gray-500");
       }
 
       function disablePrevBtn() {
@@ -173,12 +136,26 @@
 
       function setDisableNextBtnStyles() {
         nextBtn.disabled = true;
-        nextBtn.classList.add("btn-disabled");
+        nextBtn.classList.add("disabled:bg-gray-500");
       }
 
       function disableNextBtn() {
         if (currentSongIndex === songs.length - 1) {
           setDisableNextBtnStyles();
+        }
+      }
+
+      function updateButtonStates() {
+        if (currentSongIndex === 0) {
+          disablePrevBtn();
+        } else {
+          enablePrevBtn();
+        }
+
+        if (currentSongIndex === songs.length - 1) {
+          disableNextBtn();
+        } else {
+          enableNextBtn();
         }
       }
 
@@ -192,6 +169,7 @@
         audioPlayer.load();
 
         updateProgressBar();
+        updateButtonStates(); // Ensure buttons are updated when a song is loaded
       }
 
       function playPause() {
@@ -226,74 +204,137 @@
         }
       }
 
-      function calculateProgress() {
+      function updateProgressBar() {
         const duration = audioPlayer.duration;
         const currentTime = audioPlayer.currentTime;
-        const progressPercent = (currentTime / duration) * 100;
-        console.log({ duration });
 
-        const minutes = Math.floor(currentTime / 60);
-        const seconds = Math.floor(currentTime % 60);
+        if (!isNaN(duration)) {
+          const progressPercent = (currentTime / duration) * 100;
+          progressBar.value = progressPercent;
 
-        const totalMinutes = Math.floor(duration / 60);
-        const totalSeconds = Math.floor(duration % 60);
+          const minutes = Math.floor(currentTime / 60);
+          const seconds = Math.floor(currentTime % 60);
+          currentTimeDisplay.textContent = `${minutes}:${
+            seconds < 10 ? "0" : ""
+          }${seconds}`;
 
-        return {
-          percent: progressPercent,
-          minutes,
-          seconds,
-          totalMinutes,
-          totalSeconds,
-        };
-      }
-
-      function updateProgressBar() {
-        const progressCalc = calculateProgress();
-
-        progress.style.width = `${progressCalc.percent}%`;
-
-        currentTimeDisplay.textContent = `${progressCalc.minutes}:${
-          progressCalc.seconds < 10 ? "0" : ""
-        }${progressCalc.seconds}`;
-
-        console.log(progressCalc);
-        totalTimeDisplay.textContent = `${progressCalc.totalMinutes}:${
-          progressCalc.totalSeconds < 10 ? "0" : ""
-        }${progressCalc.totalSeconds}`;
+          const totalMinutes = Math.floor(duration / 60);
+          const totalSeconds = Math.floor(duration % 60);
+          totalTimeDisplay.textContent = `${totalMinutes}:${
+            totalSeconds < 10 ? "0" : ""
+          }${totalSeconds}`;
+        }
       }
 
       function setProgress(event) {
-        const clickX = event.offsetX;
-        const width = progressBar.clientWidth;
-        const seekTime = (clickX / width) * audioPlayer.duration;
+        const duration = audioPlayer.duration;
+        const seekTime = (progressBar.value / 100) * duration;
         audioPlayer.currentTime = seekTime;
       }
 
       function prevSong() {
-        currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
-        loadSong(currentSongIndex);
-
-        disablePrevBtn();
-        enableNextBtn();
+        if (currentSongIndex > 0) {
+          currentSongIndex--;
+          loadSong(currentSongIndex);
+          updateButtonStates();
+        }
       }
 
       function nextSong() {
-        currentSongIndex = (currentSongIndex + 1) % songs.length;
-        loadSong(currentSongIndex);
+        if (currentSongIndex < songs.length - 1) {
+          currentSongIndex++;
+          loadSong(currentSongIndex);
+          updateButtonStates();
+        }
+      }
 
-        enablePrevBtn();
-        disableNextBtn();
+      // Function to render the playlist
+      function renderPlaylist() {
+        songs.forEach((song, index) => {
+          const li = document.createElement("li");
+          li.textContent = `${song.title} - ${song.artist}`;
+          li.className =
+            "cursor-pointer hover:text-green-500 py-2 border-b border-gray-700";
+          li.addEventListener("click", () => {
+            currentSongIndex = index;
+            loadSong(currentSongIndex);
+            audioPlayer.play();
+            playPauseBtn.textContent = "Pause";
+            isPlaying = true;
+          });
+          playlistElement.appendChild(li);
+        });
       }
 
       playPauseBtn.addEventListener("click", playPause);
       prevBtn.addEventListener("click", prevSong);
       nextBtn.addEventListener("click", nextSong);
-      progressBar.addEventListener("click", setProgress);
+      progressBar.addEventListener("input", setProgress);
 
       audioPlayer.addEventListener("timeupdate", updateProgressBar);
       audioPlayer.addEventListener("ended", nextSong);
 
       loadSong(currentSongIndex);
+
+      // Initial button state update
+      updateButtonStates();
+
+      // Call the function to render the playlist
+      renderPlaylist();
+    </script>
+
+    <script>
+      const canvas = document.getElementById("waveform");
+      const ctx = canvas.getContext("2d");
+
+      const audioContext = new (window.AudioContext ||
+        window.webkitAudioContext)();
+      const analyser = audioContext.createAnalyser();
+      const source = audioContext.createMediaElementSource(audioPlayer);
+
+      source.connect(analyser);
+      analyser.connect(audioContext.destination);
+
+      analyser.fftSize = 1024; // Determines the frequency resolution
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+
+      function drawWaveform() {
+        ctx.clearRect(0, 0, (canvas.width = 480), (canvas.height = 480)); // Clear the canvas
+
+        analyser.getByteFrequencyData(dataArray); // Get frequency data
+
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const radius = 100;
+
+        ctx.beginPath();
+        for (let i = 0; i < bufferLength; i++) {
+          const angle = (i / bufferLength) * Math.PI * 2; // Map data to 360°
+          const barHeight = dataArray[i] / 2;
+
+          const x = centerX + Math.cos(angle) * (radius + barHeight);
+          const y = centerY + Math.sin(angle) * (radius + barHeight);
+
+          if (i === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+        }
+        ctx.closePath();
+        ctx.strokeStyle = "rgb(34, 197, 94)"; // Green color
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        requestAnimationFrame(drawWaveform); // Animate the waveform
+      }
+
+      // Start the visualization when the audio is played
+      audioPlayer.addEventListener("play", () => {
+        audioContext.resume(); // Resume the audio context if it was suspended
+        drawWaveform();
+      });
     </script>
   </body>
 </html>
